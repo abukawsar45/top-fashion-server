@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require("express");
 const cors =require("cors");
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -24,13 +24,49 @@ const client = new MongoClient(uri, {
 
 
 
-// topFashionDb
-// allProducts
-
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
+
+    const allProductsCollection = client.db(process.env.DB_NAME).collection(process.env.DB_COLLECTION);
+
+    // all products get
+    app.get("/allProducts", async(req, res)=>{
+      try {
+        const result = await allProductsCollection.find().toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal server error");
+      }
+    })
+
+    // single products get
+    app.get("/allProducts/:id", async(req,res)=>{
+      try {
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await allProductsCollection.findOne(query);
+        res.send(result);
+      } catch (error) {
+        console.log(error)
+        res.status(500).send("Internal server error");
+      }
+    })
+    // only category get
+    app.get("/allProductsCategory", async(req,res)=>{
+      try {
+        const projection = { category : 1}
+        const cursor = allProductsCollection.find().project(projection)
+        const result = await cursor.toArray()
+        res.send(result);
+      } catch (error) {
+        console.log(error)
+        res.status(500).send("Internal server error");
+      }
+    })
+
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
