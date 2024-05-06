@@ -54,6 +54,28 @@ async function run() {
         res.status(500).send("Internal server error");
       }
     })
+
+    
+    // Search by product name
+    app.get("/productsName/:name", async (req, res) => {
+      const name = req.params.name?.toLowerCase();
+      let query = {};
+      if (name)
+      {
+        query = { name: { $regex: name, $options: 'i' } };
+      }
+
+      try
+      {
+        const result = await allProductsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error)
+      {
+        console.error("Error fetching products:", error);
+        res.status(500).send("Internal server error");
+      }
+    });
+
     // only category get
     app.get("/allProductsCategory", async(req,res)=>{
       try {
